@@ -1,5 +1,6 @@
 package com.seha.springauth.security;
 
+import com.seha.springauth.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.seha.springauth.security.jwt.AuthEntryPointJwt;
 import com.seha.springauth.security.jwt.AuthTokenFilter;
-import com.seha.springauth.security.services.UserDetailsServiceImpl;
 
 @Configuration
 //@EnableWebSecurity
