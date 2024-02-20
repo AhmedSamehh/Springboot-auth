@@ -14,6 +14,8 @@ import jakarta.validation.constraints.Size;
                 @UniqueConstraint(columnNames = "email")
         })
 public class User {
+    public User() {
+    }
 
     public User(String username, String email, String password) {
         this.username = username;
