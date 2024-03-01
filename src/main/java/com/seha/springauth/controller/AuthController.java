@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.seha.springauth.model.Seller;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seha.springauth.model.ERole;
 import com.seha.springauth.model.Role;
-import com.seha.springauth.model.User;
 import com.seha.springauth.payload.request.LoginRequest;
 import com.seha.springauth.payload.request.SignupRequest;
 import com.seha.springauth.payload.response.UserInfoResponse;
 import com.seha.springauth.payload.response.MessageResponse;
 import com.seha.springauth.repository.RoleRepository;
-import com.seha.springauth.repository.UserRepository;
+import com.seha.springauth.repository.SellerRepository;
 import com.seha.springauth.security.jwt.JwtUtils;
 import com.seha.springauth.security.services.UserDetailsImpl;
 
@@ -42,7 +42,7 @@ public class AuthController {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    UserRepository userRepository;
+    SellerRepository sellerRepository;
 
     @Autowired
     RoleRepository roleRepository;
@@ -57,7 +57,7 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -71,23 +71,22 @@ public class AuthController {
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(new UserInfoResponse(userDetails.getId(),
-                        userDetails.getUsername(),
+                        userDetails.getFirstname(),
+                        userDetails.getLastname(),
                         userDetails.getEmail(),
                         roles));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
-        }
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (sellerRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
         // Create new user's account
-        User user = new User(signUpRequest.getUsername(),
+        Seller seller = new Seller(signUpRequest.getFirstname(),
+                signUpRequest.getLastname(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
@@ -121,8 +120,8 @@ public class AuthController {
             });
         }
 
-        user.setRoles(roles);
-        userRepository.save(user);
+        seller.setRoles(roles);
+        sellerRepository.save(seller);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
